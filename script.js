@@ -91,6 +91,7 @@ function toggleFullScreen(videoElement) {
 
     setTimeout(() => {
     lb.classList.add('active');
+    lbVideo.play();
     }, 10);
 }
 
@@ -100,6 +101,7 @@ function closeVideoLightbox() {
     const canvas = document.getElementById('paintCanvas');
 
     lbVideo.pause();
+    lbVideo.currentTime = 0;
     lb.classList.remove('active');
     
     
