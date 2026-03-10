@@ -9,8 +9,8 @@
 
 .reveal {
     opacity: 0;
-    transform: translateY(40px);
-    transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+    transform: translateY(50px);
+    transition: all 3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .reveal.active {
@@ -18,19 +18,20 @@
     transform: translateY(0);
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Fixed Sync & Original Background */
 ::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-track { background: var(--bg); } /* Keeps your original background */
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+    background-color: var(--accent); /* Solid color prevents the "lag" or tearing during scroll */
     border-radius: 10px;
-    border: 2px solid var(--bg);
+    border: 2px solid var(--bg); 
+    background-clip: padding-box;
+    cursor: auto !important;
 }
 
 @media (hover: hover) {
     ::-webkit-scrollbar-thumb:hover { 
-        background: var(--accent); 
-        box-shadow: 0 0 10px var(--accent); 
+        background-color: #e6b788; 
     }
 }
 
@@ -50,9 +51,11 @@ body {
 }    
 * { cursor: none; }
 
+/* Keeps the fairy dust trail on top of everything, including fullscreen elements */
 #paintCanvas {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    pointer-events: none; z-index: 9999;
+    pointer-events: none; 
+    z-index: 10001; 
 }
 
 .serif-title { font-family: 'Playfair Display', serif; font-style: italic; }
@@ -66,20 +69,20 @@ body {
 
 nav {
     position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between;
-    padding: 20px 8%; z-index: 1000; align-items: center;
+    padding: 20px 8%; z-index: 1000; align-items: center; 
 }
 
 .logo { font-size: 1.5rem; font-weight: 600; letter-spacing: 2px; }
-.logo span { color: var(--accent); font-weight: 300; }
-nav ul { display: flex; list-style: none; }
-nav ul li { margin-left: 30px; }
+.logo span { color: var(--accent); font-weight: 400; }
+nav ul { display: flex; list-style: none;  }
+nav ul li { margin-left: 30px;  }
 nav ul li a { 
     text-decoration: none; color: var(--text); font-size: 0.8rem; letter-spacing: 2px; 
-    transition: 0.3s; position: relative; padding-bottom: 5px;
+    transition: 0.3s; position: relative; padding-bottom: 5px; 
 }
 nav ul li a::after {
     content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 1px;
-    background: var(--accent); transition: width 0.3s ease, left 0.3s ease; transform: translateX(-50%);
+    background: var(--accent); transition: width 0.3s ease, left 0.3s ease; transform: translateX(-50%); 
 }
 
 @media (hover: hover) {
@@ -247,6 +250,7 @@ footer { text-align: center; padding: 60px; font-size: 0.8rem; opacity: 0.4; let
 
 /* RESPONSIVENESS */
 @media (max-width: 1000px) {
+    .hero { padding-top: 120px;}
     .hero-container { flex-direction: column; text-align: center; gap: 50px; }
     .contact-container { grid-template-columns: 1fr; padding: 40px; }
     .gallery-grid { grid-template-columns: repeat(2, 1fr); max-height: 600px; } /* 2 columns on mobile */
@@ -265,9 +269,14 @@ video::-webkit-media-controls-panel { width: calc(100% + 30px); }
     object-fit: cover; 
     background: #000;
     width: 100%;
-    height: 350px; /* Fixed height for uniformity in a 3-column layout */
+    height: 450px; 
     display: block;
+    transition: transform 0.20s ease;
     cursor: pointer;
+}
+
+.video-wrapper:hover video {
+    transform: scale(1.05);
 }
 
 video::-webkit-media-controls-play-button,
@@ -334,6 +343,95 @@ a, button, img, video, .close, .art-card img, .video-wrapper video {
 
 /* --- HIDE NATIVE FULLSCREEN BUTTON --- */
 video::-webkit-media-controls-fullscreen-button {
-    display: none !important;
+    display: auto !important;
 }
 
+/* Cursor visible when hovering gallery scroll area */
+.gallery-grid:hover {
+    cursor: auto !important;
+}
+
+/* Video Lightbox Specifics */
+.video-lightbox-wrapper {
+    width: 90vw;
+    height: 90vh;
+    max-width: 1100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform: scale(0.8);
+    opacity: 0;
+    transition: transform 0.45s cubic-bezier(.2,.8,.2,1), opacity 0.45s ease;
+}
+
+/* Reusing your active logic for the scale effect */
+.lightbox.active .video-lightbox-wrapper {
+    transform: scale(1);
+    opacity: 1;
+}
+
+#lightboxVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 20px;
+    border: var(--glass-border);
+    background: #000;
+}
+
+/* Keep fairy dust visible on top of video lightbox */
+#videoLightbox {
+    z-index: 10000;
+}
+
+.thank-you-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    animation: fadeInLuminous 0.8s ease forwards;
+    position: relative;
+}
+
+.success-glow {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: var(--accent);
+    filter: blur(80px);
+    opacity: 0.2;
+    z-index: -1;
+}
+
+@keyframes fadeInLuminous {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+    color: white;
+    opacity: 0.7;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.video-wrapper {
+    position: relative;
+}
+
+.video-wrapper:hover .play-icon {
+    opacity: 0;
+}

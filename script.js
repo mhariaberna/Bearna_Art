@@ -75,32 +75,67 @@ function moveVideoSlider(direction) {
 
 // --- FULLSCREEN VIDEO ON CLICK ---
 function toggleFullScreen(videoElement) {
-    // Target the container instead of the video tag
-    const wrapper = videoElement.parentElement; 
+    const lb = document.getElementById('videoLightbox');
+    const lbVideo = document.getElementById('lightboxVideo');
+    const source = videoElement.querySelector('source').src;
     const canvas = document.getElementById('paintCanvas');
 
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        // Enter Fullscreen
-        if (wrapper.requestFullscreen) {
-            wrapper.requestFullscreen();
-        } else if (wrapper.webkitRequestFullscreen) {
-            wrapper.webkitRequestFullscreen();
-        }
-        // Move the canvas inside the fullscreen wrapper so it appears on top
-        wrapper.appendChild(canvas);
-    } else {
-        // Exit Fullscreen
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        }
-    }
+    // Set video source and load it
+    lbVideo.src = source;
+    lbVideo.load();
+
+    lb.style.display = "flex";
+    
+    // Move canvas inside lightbox to keep fairy dust on top
+    lb.appendChild(canvas);
+
+    setTimeout(() => {
+    lb.classList.add('active');
+    }, 10);
 }
+
+function closeVideoLightbox() {
+    const lb = document.getElementById('videoLightbox');
+    const lbVideo = document.getElementById('lightboxVideo');
+    const canvas = document.getElementById('paintCanvas');
+
+    lbVideo.pause();
+    lb.classList.remove('active');
+    
+    
+    setTimeout(() => {
+        lb.style.display = "none";
+        // Put the canvas back to the body
+        document.body.appendChild(canvas);
+    }, 400); 
+}
+
+// Update the click listener for the video slides
+document.querySelectorAll('.video-wrapper video').forEach(video => {
+    video.onclick = function() { toggleFullScreen(this); };
+});
 
 // Ensure the canvas goes back to the body when the user presses 'Esc'
 document.addEventListener('fullscreenchange', exitHandler);
 document.addEventListener('webkitfullscreenchange', exitHandler);
+
+// --- LIGHTBOX VIDEO CONTROLS ---
+const lbVideo = document.getElementById('lightboxVideo');
+
+lbVideo.addEventListener("click", function(e) {
+    e.stopPropagation();
+
+    if (lbVideo.paused) {
+        lbVideo.play();
+    } else {
+        lbVideo.pause();
+    }
+});
+
+lbVideo.addEventListener("dblclick", function(e) {
+    e.stopPropagation();
+    closeVideoLightbox();
+});
 
 function exitHandler() {
     if (!document.fullscreenElement && !document.webkitFullscreenElement) {
@@ -162,3 +197,74 @@ function draw() {
     requestAnimationFrame(draw);
 }
 draw();
+
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const submitBtn = document.getElementById('submitBtn');
+    const thankYou = document.getElementById('thankYouMessage');
+    const formData = new FormData(form);
+
+    // Change the button text to show progress
+    submitBtn.textContent = "Sending...";
+    submitBtn.style.opacity = "0.5";
+
+    try {
+        const response = await fetch("https://formspree.io/f/xkoqokyg", {
+            method: "POST",
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            // Smoothly hide form and show the thank you message
+            form.style.display = 'none';
+            thankYou.style.display = 'flex';
+        } else {
+            const data = await response.json();
+            alert(data.errors ? data.errors.map(error => error.message).join(", ") : "Oops! There was a problem.");
+            submitBtn.textContent = "Submit Inquiry";
+            submitBtn.style.opacity = "1";
+        }
+    } catch (error) {
+        alert("Connectivity error. Please try again later.");
+        submitBtn.textContent = "Submit Inquiry";
+        submitBtn.style.opacity = "1";
+    }
+});
+
+function resetForm() {
+    const form = document.getElementById('contactForm');
+    const thankYou = document.getElementById('thankYouMessage');
+    
+    thankYou.style.display = 'none';
+    form.style.display = 'flex';
+    form.reset();
+}
+
+// Close only when clicking outside the video
+document.getElementById("videoLightbox").addEventListener("click", function(e){
+    if(e.target.id === "videoLightbox"){
+        closeVideoLightbox();
+    }
+});
+
+// --- VIDEO HOVER PREVIEW (NETFLIX STYLE) ---
+document.querySelectorAll('.video-wrapper video').forEach(video => {
+
+    video.muted = true; // silent preview
+
+    video.addEventListener("mouseenter", () => {
+        video.currentTime = 0;
+        video.play();
+    });
+
+    video.addEventListener("mouseleave", () => {
+        video.pause();
+        video.currentTime = 0;
+    });
+
+});
