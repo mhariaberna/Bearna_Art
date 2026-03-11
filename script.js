@@ -1,3 +1,8 @@
+let galleryImages = [];
+let currentImageIndex = 0;
+let touchStartX = 0;
+let touchEndX = 0;
+
 // --- REVEAL ON SCROLL LOGIC ---
 const observerOptions = { threshold: 0.15 };
 const observer = new IntersectionObserver((entries) => {
@@ -6,7 +11,6 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
 
 // --- ALTERNATIVE VIDEO SLIDER LOGIC (Bounded, 3 items visible) ---
 const videoSlider = document.getElementById('videoSlider');
@@ -146,16 +150,21 @@ function exitHandler() {
 }
 
 function openLightbox(element) {
+
+    galleryImages = Array.from(document.querySelectorAll('.reveal img'));
+    currentImageIndex = galleryImages.indexOf(element.querySelector('img'));
+
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
-    
+
     lbImg.src = element.querySelector('img').src;
-    
+
     lb.style.display = "flex";
-    // Small timeout to allow 'display: flex' to register before adding opacity
+
     setTimeout(() => {
         lb.classList.add('active');
     }, 10);
+
 }
 
 function closeLightbox() {
@@ -167,6 +176,55 @@ function closeLightbox() {
         lb.style.display = "none";
     }, 400); 
 }
+
+// --- IMAGE SWIPE NAVIGATION ---
+const lightbox = document.getElementById("lightbox");
+
+lightbox.addEventListener("touchstart", e => {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+lightbox.addEventListener("touchend", e => {
+    touchEndX = e.changedTouches[0].screenX;
+
+    if (touchEndX < touchStartX - 50) nextImage();
+    if (touchEndX > touchStartX + 50) previousImage();
+});
+
+function nextImage() {
+
+    currentImageIndex =
+        (currentImageIndex + 1) % galleryImages.length;
+
+    document.getElementById("lightbox-img").src =
+        galleryImages[currentImageIndex].src;
+
+}
+
+function previousImage() {
+
+    currentImageIndex =
+        (currentImageIndex - 1 + galleryImages.length) %
+        galleryImages.length;
+
+    document.getElementById("lightbox-img").src =
+        galleryImages[currentImageIndex].src;
+
+}
+
+// --- VIDEO SWIPE NAVIGATION ---
+const videoLightbox = document.getElementById("videoLightbox");
+
+videoLightbox.addEventListener("touchstart", e => {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+videoLightbox.addEventListener("touchend", e => {
+    touchEndX = e.changedTouches[0].screenX;
+
+    if (touchEndX < touchStartX - 50) moveVideoSlider(1);
+    if (touchEndX > touchStartX + 50) moveVideoSlider(-1);
+});
 
 // --- FAIRY DUST MAGIC TRAIL ---
 const canvas = document.getElementById('paintCanvas');
