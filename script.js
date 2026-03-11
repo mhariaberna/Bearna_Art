@@ -1,8 +1,3 @@
-let galleryImages = [];
-let currentImageIndex = 0;
-let touchStartX = 0;
-let touchEndX = 0;
-
 // --- REVEAL ON SCROLL LOGIC ---
 const observerOptions = { threshold: 0.15 };
 const observer = new IntersectionObserver((entries) => {
@@ -11,6 +6,7 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
 
 // --- ALTERNATIVE VIDEO SLIDER LOGIC (Bounded, 3 items visible) ---
 const videoSlider = document.getElementById('videoSlider');
@@ -78,25 +74,42 @@ function moveVideoSlider(direction) {
 }
 
 // --- FULLSCREEN VIDEO ON CLICK ---
+let currentLbVideoIndex = 0;
+const allVideos = document.querySelectorAll('.video-wrapper video');
+
 function toggleFullScreen(videoElement) {
     const lb = document.getElementById('videoLightbox');
     const lbVideo = document.getElementById('lightboxVideo');
     const source = videoElement.querySelector('source').src;
     const canvas = document.getElementById('paintCanvas');
 
-    // Set video source and load it
+    currentLbVideoIndex = Array.from(allVideos).indexOf(videoElement);
+
     lbVideo.src = source;
     lbVideo.load();
 
     lb.style.display = "flex";
-    
-    // Move canvas inside lightbox to keep fairy dust on top
     lb.appendChild(canvas);
 
+    // Lock the background scrollbar
+    document.body.classList.add('no-scroll');
+
     setTimeout(() => {
-    lb.classList.add('active');
-    lbVideo.play();
+        lb.classList.add('active');
+        lbVideo.play();
     }, 10);
+}
+
+function changeVideo(direction) {
+    currentLbVideoIndex += direction;
+    // Loop around
+    if (currentLbVideoIndex < 0) currentLbVideoIndex = allVideos.length - 1;
+    if (currentLbVideoIndex >= allVideos.length) currentLbVideoIndex = 0;
+    
+    const lbVideo = document.getElementById('lightboxVideo');
+    lbVideo.src = allVideos[currentLbVideoIndex].querySelector('source').src;
+    lbVideo.load();
+    lbVideo.play();
 }
 
 function closeVideoLightbox() {
@@ -108,10 +121,11 @@ function closeVideoLightbox() {
     lbVideo.currentTime = 0;
     lb.classList.remove('active');
     
-    
+    // Unlock the background scrollbar
+    document.body.classList.remove('no-scroll');
+
     setTimeout(() => {
         lb.style.display = "none";
-        // Put the canvas back to the body
         document.body.appendChild(canvas);
     }, 400); 
 }
@@ -149,82 +163,47 @@ function exitHandler() {
     }
 }
 
+let currentImageIndex = 0;
+const artCards = document.querySelectorAll('.art-card img');
+
 function openLightbox(element) {
-
-    galleryImages = Array.from(document.querySelectorAll('.reveal img'));
-    currentImageIndex = galleryImages.indexOf(element.querySelector('img'));
-
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
-
-    lbImg.src = element.querySelector('img').src;
-
+    const imgElement = element.querySelector('img');
+    
+    currentImageIndex = Array.from(artCards).indexOf(imgElement);
+    lbImg.src = imgElement.src;
+    
     lb.style.display = "flex";
+    
+    // Lock the background scrollbar
+    document.body.classList.add('no-scroll'); 
 
     setTimeout(() => {
         lb.classList.add('active');
     }, 10);
+}
 
+function changeImage(direction) {
+    currentImageIndex += direction;
+    // Loop around if reaching the end or beginning
+    if (currentImageIndex < 0) currentImageIndex = artCards.length - 1;
+    if (currentImageIndex >= artCards.length) currentImageIndex = 0;
+    
+    document.getElementById('lightbox-img').src = artCards[currentImageIndex].src;
 }
 
 function closeLightbox() {
     const lb = document.getElementById('lightbox');
     lb.classList.remove('active');
     
-    // Wait for the fade-out animation to finish before hiding display
+    // Unlock the background scrollbar
+    document.body.classList.remove('no-scroll'); 
+
     setTimeout(() => {
         lb.style.display = "none";
     }, 400); 
 }
-
-// --- IMAGE SWIPE NAVIGATION ---
-const lightbox = document.getElementById("lightbox");
-
-lightbox.addEventListener("touchstart", e => {
-    touchStartX = e.changedTouches[0].screenX;
-});
-
-lightbox.addEventListener("touchend", e => {
-    touchEndX = e.changedTouches[0].screenX;
-
-    if (touchEndX < touchStartX - 50) nextImage();
-    if (touchEndX > touchStartX + 50) previousImage();
-});
-
-function nextImage() {
-
-    currentImageIndex =
-        (currentImageIndex + 1) % galleryImages.length;
-
-    document.getElementById("lightbox-img").src =
-        galleryImages[currentImageIndex].src;
-
-}
-
-function previousImage() {
-
-    currentImageIndex =
-        (currentImageIndex - 1 + galleryImages.length) %
-        galleryImages.length;
-
-    document.getElementById("lightbox-img").src =
-        galleryImages[currentImageIndex].src;
-
-}
-
-// --- VIDEO SWIPE NAVIGATION ---
-const videoLightbox = document.getElementById("videoLightbox");
-
-videoLightbox.addEventListener("touchstart", e => {
-    touchStartX = e.changedTouches[0].screenX;
-});
-
-videoLightbox.addEventListener("touchend", e => {
-    touchEndX = e.changedTouches[0].screenX;
-
-    if (touchEndX < touchStartX - 50) moveVideoSlider(1);
-    if (touchEndX > touchStartX + 50) moveVideoSlider(-1);
-});
 
 // --- FAIRY DUST MAGIC TRAIL ---
 const canvas = document.getElementById('paintCanvas');
@@ -328,3 +307,41 @@ document.querySelectorAll('.video-wrapper video').forEach(video => {
     });
 
 });
+
+// --- SWIPE GESTURES FOR MOBILE ---
+let touchstartX = 0;
+let touchendX = 0;
+
+function handleSwipe(type) {
+    const minDistance = 50; // minimum swipe distance to register
+    if (touchendX < touchstartX - minDistance) {
+        // Swiped Left -> Go Next
+        if (type === 'image') changeImage(1);
+        if (type === 'video') changeVideo(1);
+    }
+    if (touchendX > touchstartX + minDistance) {
+        // Swiped Right -> Go Prev
+        if (type === 'image') changeImage(-1);
+        if (type === 'video') changeVideo(-1);
+    }
+}
+
+// Image Swipe Listeners
+const imageLightbox = document.getElementById('lightbox');
+imageLightbox.addEventListener('touchstart', e => {
+    touchstartX = e.changedTouches[0].screenX;
+}, {passive: true});
+imageLightbox.addEventListener('touchend', e => {
+    touchendX = e.changedTouches[0].screenX;
+    handleSwipe('image');
+}, {passive: true});
+
+// Video Swipe Listeners
+const videoLightbox = document.getElementById('videoLightbox');
+videoLightbox.addEventListener('touchstart', e => {
+    touchstartX = e.changedTouches[0].screenX;
+}, {passive: true});
+videoLightbox.addEventListener('touchend', e => {
+    touchendX = e.changedTouches[0].screenX;
+    handleSwipe('video');
+}, {passive: true});
