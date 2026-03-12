@@ -251,6 +251,23 @@ imgLB.addEventListener('touchend', e => {
     handleGesture('img'); 
 }, {passive: true});
 
+// Tap left/right zones for image navigation (mobile)
+imgLB.addEventListener("click", function(e){
+
+    // Ignore clicks on the image itself
+    if(e.target.id === "lightbox-img") return;
+
+    const screenX = e.clientX;
+    const screenWidth = window.innerWidth;
+
+    if(screenX < screenWidth / 2){
+        navigateImages(-1); // left side
+    } else {
+        navigateImages(1); // right side
+    }
+
+});
+
 // Video Lightbox Touch Support
 const vidLB = document.getElementById('videoLightbox');
 vidLB.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
@@ -258,3 +275,19 @@ vidLB.addEventListener('touchend', e => {
     touchEndX = e.changedTouches[0].screenX; 
     handleGesture('vid'); 
 }, {passive: true});
+
+// Tap zones for video navigation (mobile)
+vidLB.addEventListener("click", function(e){
+
+    if(e.target.id === "lightboxVideo") return;
+
+    const screenX = e.clientX;
+    const screenWidth = window.innerWidth;
+
+    if(screenX < screenWidth / 2){
+        navigateVideos(-1);
+    } else {
+        navigateVideos(1);
+    }
+
+});
