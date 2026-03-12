@@ -470,3 +470,70 @@ body.no-scroll {
     overflow: hidden;
     height: 100vh;
 }
+
+/* --- FULLSCREEN LIGHTBOX NAVIGATION BUTTONS --- */
+.lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 15px 20px;
+    font-size: 24px;
+    border-radius: 50%;
+    cursor: none !important; /* Keeps your custom fairy dust cursor active */
+    z-index: 10005; /* Keeps buttons above the images/videos */
+    transition: all 0.4s ease;
+}
+
+@media (hover: hover) {
+    .lb-nav:hover {
+        background: rgba(212, 163, 115, 0.3); 
+        color: var(--text); 
+        backdrop-filter: blur(5px); 
+        box-shadow: 0 0 15px rgba(212, 163, 115, 0.4);
+    }
+}
+
+.lb-prev { left: 40px; }
+.lb-next { right: 40px; }
+
+/* Keep buttons visible but smaller on mobile devices */
+@media (max-width: 1000px) {
+    .lb-prev { left: 10px; padding: 10px 15px; font-size: 18px; }
+    .lb-next { right: 10px; padding: 10px 15px; font-size: 18px; }
+}
+
+/* --- LIGHTBOX NAVIGATION BUTTONS --- */
+.lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 15px 22px;
+    font-size: 28px;
+    border-radius: 50%;
+    cursor: none !important; /* Keeps your sparkle cursor */
+    z-index: 10005;
+    transition: all 0.4s ease;
+    backdrop-filter: blur(5px);
+}
+
+.lb-nav:hover {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 20px var(--accent);
+}
+
+.lb-prev { left: 30px; }
+.lb-next { right: 30px; }
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+    .lb-nav { padding: 10px 15px; font-size: 20px; }
+    .lb-prev { left: 10px; }
+    .lb-next { right: 10px; }
+}
