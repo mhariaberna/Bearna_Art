@@ -115,24 +115,24 @@ function toggleFullScreen(videoElement) {
     const canvas = document.getElementById('paintCanvas');
 
     currentVidIdx = Array.from(allGalleryVids).indexOf(videoElement);
-   lbVideo.src = videoElement.querySelector('source').src;
+    lbVideo.src = videoElement.querySelector('source').src;
 
-/* remove controls */
-lbVideo.removeAttribute("controls");
+    /* remove controls */
+    lbVideo.removeAttribute("controls");
 
-/* force fast playback */
-lbVideo.preload = "auto";
-lbVideo.muted = false;
+    /* force fast playback */
+    lbVideo.preload = "auto";
+    lbVideo.muted = false;
 
-/* start playing instantly */
-const playPromise = lbVideo.play();
+    /* start playing instantly */
+    const playPromise = lbVideo.play();
 
 if (playPromise !== undefined) {
     playPromise.catch(()=>{});
 }
 
-/* disable tap pause */
-lbVideo.onclick = function(e){
+    /* disable tap pause */
+    lbVideo.onclick = function(e){
     e.preventDefault();
 };
 
@@ -142,7 +142,6 @@ lbVideo.onclick = function(e){
 
     setTimeout(() => {
         lb.classList.add('active');
-        lbVideo.play();
     }, 10);
 }
 
@@ -167,16 +166,16 @@ function navigateVideos(step) {
 
     const animation = step === 1 ? "slide-up" : "slide-down";
 
+    currentVidIdx =
+    (currentVidIdx + step + allGalleryVids.length) %
+    allGalleryVids.length;
+
+    const nextSrc =
+    allGalleryVids[currentVidIdx].querySelector('source').src;
+
     lbVideo.classList.add(animation);
 
     setTimeout(() => {
-
-        currentVidIdx =
-        (currentVidIdx + step + allGalleryVids.length) %
-        allGalleryVids.length;
-
-        const nextSrc =
-        allGalleryVids[currentVidIdx].querySelector('source').src;
 
         lbVideo.pause();
         lbVideo.src = nextSrc;
@@ -192,10 +191,13 @@ function navigateVideos(step) {
         lbVideo.classList.remove("slide-up","slide-down");
 
     },200);
+
+    /* preload next video for smoother swipe */
     const preloadVideo = document.createElement("video");
     preloadVideo.src = nextSrc;
     preloadVideo.preload = "auto";
 }
+
 
 // --- GLOBAL EVENT LISTENERS (Background & Keys) ---
 // Close lightbox when clicking the dark background
