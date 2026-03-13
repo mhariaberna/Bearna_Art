@@ -112,12 +112,24 @@ function toggleFullScreen(videoElement) {
     const canvas = document.getElementById('paintCanvas');
 
     currentVidIdx = Array.from(allGalleryVids).indexOf(videoElement);
-    lbVideo.src = videoElement.querySelector('source').src;
-    lbVideo.removeAttribute("controls");
-    lbVideo.load();
-    lbVideo.muted = false;
-    lbVideo.play();
-    lbVideo.onclick = function(e){
+   lbVideo.src = videoElement.querySelector('source').src;
+
+/* remove controls */
+lbVideo.removeAttribute("controls");
+
+/* force fast playback */
+lbVideo.preload = "auto";
+lbVideo.muted = false;
+
+/* start playing instantly */
+const playPromise = lbVideo.play();
+
+if (playPromise !== undefined) {
+    playPromise.catch(()=>{});
+}
+
+/* disable tap pause */
+lbVideo.onclick = function(e){
     e.preventDefault();
 };
 
@@ -150,22 +162,19 @@ function navigateVideos(step) {
 
     const lbVideo = document.getElementById('lightboxVideo');
 
-    const animation = step === 1 ? "slide-up" : "slide-down";
+    currentVidIdx = (currentVidIdx + step + allGalleryVids.length) % allGalleryVids.length;
 
-    lbVideo.classList.add(animation);
+    const nextSrc = allGalleryVids[currentVidIdx].querySelector('source').src;
 
-    setTimeout(() => {
+    lbVideo.src = nextSrc;
 
-        currentVidIdx = (currentVidIdx + step + allGalleryVids.length) % allGalleryVids.length;
+    lbVideo.preload = "auto";
 
-        lbVideo.src = allGalleryVids[currentVidIdx].querySelector('source').src;
+    const playPromise = lbVideo.play();
 
-        lbVideo.load();
-        lbVideo.play();
-
-        lbVideo.classList.remove("slide-up","slide-down");
-
-    }, 250);
+    if (playPromise !== undefined) {
+        playPromise.catch(()=>{});
+    }
 
 }
 
@@ -273,29 +282,35 @@ document.querySelectorAll('.video-wrapper video').forEach(video => {
 function handleGesture(type) {
 
     const verticalThreshold = 60;
-    const horizontalThreshold = 80;
+    const horizontalThreshold = 60;
 
     const deltaY = touchEndY - touchStartY;
     const deltaX = touchEndX - touchStartX;
 
-    // Swipe Up → Next
+    // UP swipe → next
     if (deltaY < -verticalThreshold) {
         type === 'img' ? navigateImages(1) : navigateVideos(1);
         return;
     }
 
-    // Swipe Down → Previous
+    // DOWN swipe → previous
     if (deltaY > verticalThreshold) {
         type === 'img' ? navigateImages(-1) : navigateVideos(-1);
         return;
     }
 
-    // Swipe Right → Close (like Shorts exit)
-    if (deltaX > horizontalThreshold) {
-        if (type === 'img') closeLightbox();
-        if (type === 'vid') closeVideoLightbox();
+    // LEFT swipe → next
+    if (deltaX < -horizontalThreshold) {
+        type === 'img' ? navigateImages(1) : navigateVideos(1);
         return;
     }
+
+    // RIGHT swipe → previous
+    if (deltaX > horizontalThreshold) {
+        type === 'img' ? navigateImages(-1) : navigateVideos(-1);
+        return;
+    }
+
 }
 
 // Image Lightbox Touch Support
