@@ -96,12 +96,15 @@ function navigateImages(step) {
 
     setTimeout(() => {
 
-        currentImgIdx = (currentImgIdx + step + allGalleryImgs.length) % allGalleryImgs.length;
+        currentImgIdx =
+        (currentImgIdx + step + allGalleryImgs.length) %
+        allGalleryImgs.length;
+
         img.src = allGalleryImgs[currentImgIdx].src;
 
         img.classList.remove("slide-up","slide-down");
 
-    }, 250);
+    },200);
 
 }
 
@@ -162,20 +165,36 @@ function navigateVideos(step) {
 
     const lbVideo = document.getElementById('lightboxVideo');
 
-    currentVidIdx = (currentVidIdx + step + allGalleryVids.length) % allGalleryVids.length;
+    const animation = step === 1 ? "slide-up" : "slide-down";
 
-    const nextSrc = allGalleryVids[currentVidIdx].querySelector('source').src;
+    lbVideo.classList.add(animation);
 
-    lbVideo.src = nextSrc;
+    setTimeout(() => {
 
-    lbVideo.preload = "auto";
+        currentVidIdx =
+        (currentVidIdx + step + allGalleryVids.length) %
+        allGalleryVids.length;
 
-    const playPromise = lbVideo.play();
+        const nextSrc =
+        allGalleryVids[currentVidIdx].querySelector('source').src;
 
-    if (playPromise !== undefined) {
-        playPromise.catch(()=>{});
-    }
+        lbVideo.pause();
+        lbVideo.src = nextSrc;
 
+        lbVideo.preload = "auto";
+
+        const playPromise = lbVideo.play();
+
+        if(playPromise !== undefined){
+            playPromise.catch(()=>{});
+        }
+
+        lbVideo.classList.remove("slide-up","slide-down");
+
+    },200);
+    const preloadVideo = document.createElement("video");
+    preloadVideo.src = nextSrc;
+    preloadVideo.preload = "auto";
 }
 
 // --- GLOBAL EVENT LISTENERS (Background & Keys) ---
@@ -287,28 +306,24 @@ function handleGesture(type) {
     const deltaY = touchEndY - touchStartY;
     const deltaX = touchEndX - touchStartX;
 
-    // UP swipe → next
+    /* SWIPE UP → NEXT */
     if (deltaY < -verticalThreshold) {
         type === 'img' ? navigateImages(1) : navigateVideos(1);
         return;
     }
 
-    // DOWN swipe → previous
+    /* SWIPE DOWN → PREVIOUS */
     if (deltaY > verticalThreshold) {
         type === 'img' ? navigateImages(-1) : navigateVideos(-1);
         return;
     }
 
-    // LEFT swipe → next
-    if (deltaX < -horizontalThreshold) {
-        type === 'img' ? navigateImages(1) : navigateVideos(1);
-        return;
-    }
-
-    // RIGHT swipe → previous
+    /* SWIPE RIGHT → EXIT FULLSCREEN VIDEO */
     if (deltaX > horizontalThreshold) {
-        type === 'img' ? navigateImages(-1) : navigateVideos(-1);
-        return;
+        if(type === 'vid'){
+            closeVideoLightbox();
+            return;
+        }
     }
 
 }
