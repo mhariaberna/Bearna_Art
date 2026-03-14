@@ -15,17 +15,15 @@
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
         <span class="close">&times;</span>
         <button class="lb-nav lb-prev" onclick="event.stopPropagation(); navigateImages(-1)">&#10094;</button>
-        <div class="lb-content-wrapper" id="lb-content-wrapper">
-             <img class="lightbox-content" id="lightbox-img" onclick="event.stopPropagation()">
-        </div>
+        <img class="lightbox-content" id="lightbox-img" onclick="event.stopPropagation()">
         <button class="lb-nav lb-next" onclick="event.stopPropagation(); navigateImages(1)">&#10095;</button>
     </div>
 
     <div id="videoLightbox" class="lightbox" onclick="closeVideoLightbox()">
         <span class="close">&times;</span>
         <button class="lb-nav lb-prev" onclick="event.stopPropagation(); navigateVideos(-1)">&#10094;</button>
-        <div class="video-lightbox-wrapper" id="vid-content-wrapper" onclick="event.stopPropagation()">
-            <video id="lightboxVideo" playsinline disablePictureInPicture 
+        <div class="video-lightbox-wrapper" onclick="event.stopPropagation()">
+            <video id="lightboxVideo" playsinline controls disablePictureInPicture 
                 controlsList="nodownload noplaybackrate nofullscreen" 
                 oncontextmenu="return false;">
                 <source src="" type="video/mp4">
@@ -82,15 +80,65 @@
         <h2 class="section-title serif-title">Creative Process</h2>
         <div class="video-container">
             <button class="slider-btn prev" onclick="moveVideoSlider(-1)">&#10094;</button>
-            <div class="video-viewport" id="videoViewport">
+            <div class="video-viewport">
                 <div class="video-slider" id="videoSlider">
-                    <div class="video-slide"><div class="video-wrapper glass"><video playsinline preload="metadata"><source src="videos/Artwork1.mp4" type="video/mp4"></video></div></div>
-                    <div class="video-slide"><div class="video-wrapper glass"><video playsinline preload="metadata"><source src="videos/Artwork2.mp4" type="video/mp4"></video></div></div>
-                    <div class="video-slide"><div class="video-wrapper glass"><video playsinline preload="metadata"><source src="videos/Artwork3.mp4" type="video/mp4"></video></div></div>
-                    <div class="video-slide"><div class="video-wrapper glass"><video playsinline preload="metadata"><source src="videos/Artwork4.mp4" type="video/mp4"></video></div></div>
-                    <div class="video-slide"><div class="video-wrapper glass"><video playsinline preload="metadata"><source src="videos/Artwork5.mp4" type="video/mp4"></video></div></div>
-                    <div class="video-slide"><div class="video-wrapper glass"><video playsinline preload="metadata"><source src="videos/Artwork6.mp4" type="video/mp4"></video></div></div>
-                    <div class="video-slide"><div class="video-wrapper glass"><video playsinline preload="metadata"><source src="videos/Artwork7.mp4" type="video/mp4"></video></div></div>
+                    
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture>
+                                <source src="videos/Artwork1.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture>
+                                <source src="videos/Artwork2.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture>
+                                <source src="videos/Artwork3.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork4.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork5.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                           <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork6.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork7.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
                 </div>
             </div>
             <button class="slider-btn next" onclick="moveVideoSlider(1)">&#10095;</button>
