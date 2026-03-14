@@ -1,97 +1,127 @@
-// --- STATE MANAGEMENT ---
+// --- GLOBAL VARIABLES & SELECTIONS ---
+let touchStartX = 0;
+let touchEndX = 0;
+let touchStartY = 0;
+let touchEndY = 0;
+
 let currentImgIdx = 0;
 let currentVidIdx = 0;
 const allGalleryImgs = document.querySelectorAll('.art-card img');
-const allGalleryVids = document.querySelectorAll('.video-slide video');
+const allGalleryVids = document.querySelectorAll('.video-wrapper video');
 
-// Touch tracking for magnet effect
-let startY = 0;
-let currentY = 0;
-let startX = 0;
-let isDragging = false;
-const mobileThreshold = 100; // Pixels to trigger navigation
-
-// --- INITIALIZATION ---
-const isMobile = () => window.innerWidth <= 1000;
-
-// --- MAGNET EFFECT LOGIC (Full Screen) ---
-function initMagnetEffect(elementId, type) {
-    const wrapper = document.getElementById(elementId);
-    
-    wrapper.addEventListener('touchstart', (e) => {
-        if (!isMobile()) return;
-        isDragging = true;
-        startY = e.touches[0].clientY;
-        startX = e.touches[0].clientX;
-        wrapper.style.transition = 'none';
-    }, { passive: true });
-
-    wrapper.addEventListener('touchmove', (e) => {
-        if (!isDragging || !isMobile()) return;
-        currentY = e.touches[0].clientY;
-        const deltaY = currentY - startY;
-        
-        // Follow the finger
-        wrapper.style.transform = `translateY(${deltaY}px)`;
-    }, { passive: true });
-
-    wrapper.addEventListener('touchend', (e) => {
-        if (!isDragging || !isMobile()) return;
-        isDragging = false;
-        const endY = e.changedTouches[0].clientY;
-        const endX = e.changedTouches[0].clientX;
-        const deltaY = endY - startY;
-        const deltaX = endX - startX;
-
-        wrapper.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
-
-        // Horizontal Swipe: Close
-        if (Math.abs(deltaX) > 80 && Math.abs(deltaX) > Math.abs(deltaY)) {
-            type === 'img' ? closeLightbox() : closeVideoLightbox();
-            wrapper.style.transform = `translateY(0)`;
-            return;
-        }
-
-        // Vertical Swipe: Navigate
-        if (deltaY < -mobileThreshold) {
-            // Swiped Up -> Next
-            wrapper.style.transform = `translateY(-100vh)`;
-            setTimeout(() => {
-                type === 'img' ? navigateImages(1) : navigateVideos(1);
-                wrapper.style.transform = `translateY(0)`;
-            }, 300);
-        } else if (deltaY > mobileThreshold) {
-            // Swiped Down -> Prev
-            wrapper.style.transform = `translateY(100vh)`;
-            setTimeout(() => {
-                type === 'img' ? navigateImages(-1) : navigateVideos(-1);
-                wrapper.style.transform = `translateY(0)`;
-            }, 300);
-        } else {
-            // Snap back
-            wrapper.style.transform = `translateY(0)`;
-        }
+// --- REVEAL ON SCROLL LOGIC ---
+const observerOptions = { threshold: 0.15 };
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('active');
     });
+}, observerOptions);
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// --- CREATIVE PROCESS VIDEO SLIDER (Infinite Carousel) ---
+const videoSlider = document.getElementById('videoSlider');
+let isSliderAnimating = false;
+
+function moveVideoSlider(direction) {
+    if (isSliderAnimating) return;
+    
+    // Stop all slider videos before moving
+    document.querySelectorAll('.video-slide video').forEach(v => {
+        v.pause();
+        v.currentTime = 0;
+    });
+
+    isSliderAnimating = true;
+    const visibleVideos = window.innerWidth > 1000 ? 3 : 1;
+    const shiftPercentage = 100 / visibleVideos;
+    
+    if (direction === 1) {
+        // Slide Next
+        videoSlider.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        videoSlider.style.transform = `translateX(-${shiftPercentage}%)`;
+        
+        setTimeout(() => {
+            videoSlider.appendChild(videoSlider.firstElementChild);
+            videoSlider.style.transition = 'none';
+            videoSlider.style.transform = 'translateX(0)';
+            isSliderAnimating = false;
+        }, 600);
+    } else {
+        // Slide Prev
+        videoSlider.prepend(videoSlider.lastElementChild);
+        videoSlider.style.transition = 'none';
+        videoSlider.style.transform = `translateX(-${shiftPercentage}%)`;
+        
+        void videoSlider.offsetWidth; // Force reflow
+        
+        videoSlider.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        videoSlider.style.transform = 'translateX(0)';
+        
+        setTimeout(() => {
+            isSliderAnimating = false;
+        }, 600);
+    }
 }
 
-// Apply effects
-initMagnetEffect('lb-content-wrapper', 'img');
-initMagnetEffect('vid-content-wrapper', 'vid');
+// --- IMAGE LIGHTBOX LOGIC ---
+function openLightbox(element) {
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    const clickedImg = element.querySelector('img');
+    
+    currentImgIdx = Array.from(allGalleryImgs).indexOf(clickedImg);
+    lbImg.src = clickedImg.src;
+    
+    lb.style.display = "flex";
+    document.body.classList.add('no-scroll');
+    setTimeout(() => lb.classList.add('active'), 10);
+}
 
-// --- MOBILE CAROUSEL SWIPE ---
-const videoViewport = document.getElementById('videoViewport');
-videoViewport.addEventListener('touchstart', e => startX = e.touches[0].clientX, {passive:true});
-videoViewport.addEventListener('touchend', e => {
-    if (!isMobile()) return;
-    const endX = e.changedTouches[0].clientX;
-    if (startX - endX > 50) moveVideoSlider(1);
-    if (startX - endX < -50) moveVideoSlider(-1);
-}, {passive:true});
+function closeLightbox() {
+    const lb = document.getElementById('lightbox');
+    lb.classList.remove('active');
+    document.body.classList.remove('no-scroll');
+    setTimeout(() => lb.style.display = "none", 400);
+}
 
-// --- CORE NAVIGATION ---
 function navigateImages(step) {
     currentImgIdx = (currentImgIdx + step + allGalleryImgs.length) % allGalleryImgs.length;
     document.getElementById('lightbox-img').src = allGalleryImgs[currentImgIdx].src;
+}
+
+// --- VIDEO LIGHTBOX LOGIC ---
+function toggleFullScreen(videoElement) {
+    const lb = document.getElementById('videoLightbox');
+    const lbVideo = document.getElementById('lightboxVideo');
+    const canvas = document.getElementById('paintCanvas');
+
+    currentVidIdx = Array.from(allGalleryVids).indexOf(videoElement);
+    lbVideo.src = videoElement.querySelector('source').src;
+    lbVideo.load();
+
+    lb.style.display = "flex";
+    lb.appendChild(canvas); // Move fairy dust canvas into lightbox for effect
+    document.body.classList.add('no-scroll');
+
+    setTimeout(() => {
+        lb.classList.add('active');
+        lbVideo.play();
+    }, 10);
+}
+
+function closeVideoLightbox() {
+    const lb = document.getElementById('videoLightbox');
+    const lbVideo = document.getElementById('lightboxVideo');
+    const canvas = document.getElementById('paintCanvas');
+
+    lbVideo.pause();
+    lb.classList.remove('active');
+    document.body.classList.remove('no-scroll');
+
+    setTimeout(() => {
+        lb.style.display = "none";
+        document.body.appendChild(canvas); // Return canvas to main body
+    }, 400);
 }
 
 function navigateVideos(step) {
@@ -102,75 +132,26 @@ function navigateVideos(step) {
     lbVideo.play();
 }
 
-// --- LIGHTBOX OPEN/CLOSE ---
-function openLightbox(element) {
-    const lb = document.getElementById('lightbox');
-    const lbImg = document.getElementById('lightbox-img');
-    currentImgIdx = Array.from(allGalleryImgs).indexOf(element.querySelector('img'));
-    lbImg.src = allGalleryImgs[currentImgIdx].src;
-    lb.style.display = "flex";
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => lb.classList.add('active'), 10);
-}
+// --- GLOBAL EVENT LISTENERS (Background & Keys) ---
+// Close lightbox when clicking the dark background
+document.getElementById("videoLightbox").addEventListener("click", function(e){
+    if(e.target.id === "videoLightbox") closeVideoLightbox();
+});
 
-function closeLightbox() {
-    const lb = document.getElementById('lightbox');
-    lb.classList.remove('active');
-    document.body.style.overflow = 'auto';
-    setTimeout(() => lb.style.display = "none", 400);
-}
-
-function toggleFullScreen(videoElement) {
-    const lb = document.getElementById('videoLightbox');
-    const lbVideo = document.getElementById('lightboxVideo');
-    currentVidIdx = Array.from(allGalleryVids).indexOf(videoElement);
-    lbVideo.src = videoElement.querySelector('source').src;
-    lbVideo.load();
-    lb.style.display = "flex";
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => {
-        lb.classList.add('active');
-        lbVideo.play();
-    }, 10);
-}
-
-function closeVideoLightbox() {
-    const lb = document.getElementById('videoLightbox');
-    document.getElementById('lightboxVideo').pause();
-    lb.classList.remove('active');
-    document.body.style.overflow = 'auto';
-    setTimeout(() => lb.style.display = "none", 400);
-}
-
-// --- DESKTOP CAROUSEL LOGIC ---
-let isSliderAnimating = false;
-function moveVideoSlider(direction) {
-    if (isSliderAnimating) return;
-    isSliderAnimating = true;
-    const slider = document.getElementById('videoSlider');
-    const shift = 100 / (window.innerWidth > 1000 ? 3 : 1);
-    
-    if (direction === 1) {
-        slider.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-        slider.style.transform = `translateX(-${shift}%)`;
-        setTimeout(() => {
-            slider.appendChild(slider.firstElementChild);
-            slider.style.transition = 'none';
-            slider.style.transform = 'translateX(0)';
-            isSliderAnimating = false;
-        }, 600);
-    } else {
-        slider.prepend(slider.lastElementChild);
-        slider.style.transition = 'none';
-        slider.style.transform = `translateX(-${shift}%)`;
-        void slider.offsetWidth;
-        slider.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-        slider.style.transform = 'translateX(0)';
-        setTimeout(() => isSliderAnimating = false, 600);
+// ESC key to close everything
+document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") {
+        closeLightbox();
+        closeVideoLightbox();
     }
-}
+});
 
-// --- FAIRY DUST ---
+// Setup Initial Click Listeners for Videos
+document.querySelectorAll('.video-wrapper video').forEach(video => {
+    video.onclick = function() { toggleFullScreen(this); };
+});
+
+// --- FAIRY DUST MAGIC TRAIL ---
 const canvas = document.getElementById('paintCanvas');
 const ctx = canvas.getContext('2d');
 let particles = [];
@@ -179,7 +160,6 @@ window.addEventListener('resize', resize);
 resize();
 
 document.addEventListener('mousemove', (e) => {
-    if (isMobile()) return; // Disable dust on mobile to save battery
     for(let i = 0; i < 3; i++) {
         particles.push({
             x: e.clientX, y: e.clientY,
@@ -196,6 +176,7 @@ function draw() {
     particles.forEach(p => {
         ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${p.color}, ${p.life})`;
+        ctx.shadowBlur = 8; ctx.shadowColor = `rgb(${p.color})`;
         ctx.fill();
         p.x += p.vx; p.y += p.vy; p.life -= 0.02; 
     });
@@ -204,15 +185,142 @@ function draw() {
 }
 draw();
 
-// Initial Video Setups
-document.querySelectorAll('.video-slide video').forEach(video => {
-    video.onclick = function() { toggleFullScreen(this); };
-    video.addEventListener("mouseenter", () => { if(!isMobile()) video.play(); });
-    video.addEventListener("mouseleave", () => { if(!isMobile()) { video.pause(); video.currentTime = 0; } });
+// --- CONTACT FORM SUBMISSION ---
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = document.getElementById('submitBtn');
+    const thankYou = document.getElementById('thankYouMessage');
+    const formData = new FormData(form);
+
+    submitBtn.textContent = "Sending...";
+    submitBtn.style.opacity = "0.5";
+
+    try {
+        const response = await fetch("BERNS_CONTACT_FORM_ID_HERE", {
+            method: "POST",
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        });
+        if (response.ok) {
+            form.style.display = 'none';
+            thankYou.style.display = 'flex';
+        } else {
+            alert("Oops! There was a problem.");
+            submitBtn.textContent = "Submit Inquiry";
+            submitBtn.style.opacity = "1";
+        }
+    } catch (error) {
+        alert("Connectivity error.");
+        submitBtn.textContent = "Submit Inquiry";
+        submitBtn.style.opacity = "1";
+    }
 });
 
-// Scroll Reveal
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+function resetForm() {
+    const form = document.getElementById('contactForm');
+    const thankYou = document.getElementById('thankYouMessage');
+    thankYou.style.display = 'none';
+    form.style.display = 'flex';
+    form.reset();
+}
+
+// --- VIDEO HOVER PREVIEWS ---
+document.querySelectorAll('.video-wrapper video').forEach(video => {
+    video.muted = true;
+    video.addEventListener("mouseenter", () => { video.currentTime = 0; video.play(); });
+    video.addEventListener("mouseleave", () => { video.pause(); video.currentTime = 0; });
+});
+
+// --- TOUCH & GESTURE ENGINE ---
+function handleGesture(type) {
+
+    const swipeThreshold = 50;
+
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+
+    /* HORIZONTAL SWIPE */
+
+    if (diffX < -swipeThreshold) {
+        type === 'img' ? navigateImages(1) : navigateVideos(1);
+        return;
+    }
+
+    if (diffX > swipeThreshold) {
+        type === 'img' ? navigateImages(-1) : navigateVideos(-1);
+        return;
+    }
+
+    /* VERTICAL SWIPE (mobile reels style) */
+
+    if (diffY < -swipeThreshold) {
+        type === 'img' ? navigateImages(1) : navigateVideos(1);
+    }
+
+    if (diffY > swipeThreshold) {
+        type === 'img' ? navigateImages(-1) : navigateVideos(-1);
+    }
+
+}
+
+// Image Lightbox Touch Support
+const imgLB = document.getElementById('lightbox');
+    imgLB.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive:true});
+
+imgLB.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    handleGesture('img'); 
+}, {passive: true});
+
+// Tap left/right zones for image navigation (mobile)
+imgLB.addEventListener("click", function(e){
+
+    // Ignore clicks on the image itself
+    if(e.target.id === "lightbox-img") return;
+
+    const screenX = e.clientX;
+    const screenWidth = window.innerWidth;
+
+    if(screenX < screenWidth / 2){
+        navigateImages(-1); // left side
+    } else {
+        navigateImages(1); // right side
+    }
+
+});
+
+// Video Lightbox Touch Support
+const vidLB = document.getElementById('videoLightbox');
+    vidLB.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive:true});
+
+vidLB.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;   
+    handleGesture('vid'); 
+}, {passive: true});
+
+// Tap zones for video navigation (mobile)
+vidLB.addEventListener("click", function(e){
+
+    if(e.target.id === "lightboxVideo") return;
+
+    const screenX = e.clientX;
+    const screenWidth = window.innerWidth;
+
+    if(screenX < screenWidth / 2){
+        navigateVideos(-1);
+    } else {
+        navigateVideos(1);
+    }
+
+});
+
+
