@@ -1,8 +1,11 @@
 // --- GLOBAL VARIABLES & SELECTIONS ---
-let currentImgIdx = 0;
-let currentVidIdx = 0;
 let touchStartX = 0;
 let touchEndX = 0;
+let touchStartY = 0;
+let touchEndY = 0;
+
+let currentImgIdx = 0;
+let currentVidIdx = 0;
 
 const allGalleryImgs = document.querySelectorAll('.art-card img');
 const allGalleryVids = document.querySelectorAll('.video-wrapper video');
@@ -232,22 +235,47 @@ document.querySelectorAll('.video-wrapper video').forEach(video => {
 
 // --- TOUCH & GESTURE ENGINE ---
 function handleGesture(type) {
-    const swipeThreshold = 50; 
-    if (touchEndX < touchStartX - swipeThreshold) {
-        // Swipe Left -> Next
-        type === 'img' ? navigateImages(1) : navigateVideos(1);
-    }
-    if (touchEndX > touchStartX + swipeThreshold) {
-        // Swipe Right -> Prev
-        type === 'img' ? navigateImages(-1) : navigateVideos(-1);
+
+    const swipeThreshold = 50;
+
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+
+    /* PRIORITIZE VERTICAL SWIPE */
+
+    if (Math.abs(diffY) > Math.abs(diffX)) {
+
+        if (diffY < -swipeThreshold) {
+            type === 'img' ? navigateImages(1) : navigateVideos(1);
+        }
+
+        if (diffY > swipeThreshold) {
+            type === 'img' ? navigateImages(-1) : navigateVideos(-1);
+        }
+
+    } else {
+
+        if (diffX < -swipeThreshold) {
+            type === 'img' ? navigateImages(1) : navigateVideos(1);
+        }
+
+        if (diffX > swipeThreshold) {
+            type === 'img' ? navigateImages(-1) : navigateVideos(-1);
+        }
+
     }
 }
 
 // Image Lightbox Touch Support
 const imgLB = document.getElementById('lightbox');
-imgLB.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
-imgLB.addEventListener('touchend', e => { 
-    touchEndX = e.changedTouches[0].screenX; 
+    imgLB.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive:true});
+
+imgLB.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
     handleGesture('img'); 
 }, {passive: true});
 
@@ -270,9 +298,14 @@ imgLB.addEventListener("click", function(e){
 
 // Video Lightbox Touch Support
 const vidLB = document.getElementById('videoLightbox');
-vidLB.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
-vidLB.addEventListener('touchend', e => { 
-    touchEndX = e.changedTouches[0].screenX; 
+    vidLB.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive:true});
+
+vidLB.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;   
     handleGesture('vid'); 
 }, {passive: true});
 
@@ -292,197 +325,4 @@ vidLB.addEventListener("click", function(e){
 
 });
 
-/* MOBILE REELS SYSTEM */
 
-let startY=0;
-let startX=0;
-let reelIndex=0;
-
-const imgReels=document.getElementById("imgReels");
-const vidReels=document.getElementById("vidReels");
-
-function buildImageReels(){
-
-imgReels.innerHTML="";
-
-allGalleryImgs.forEach(img=>{
-
-const div=document.createElement("div");
-div.className="reel-item";
-
-const im=document.createElement("img");
-im.src=img.src;
-
-div.appendChild(im);
-imgReels.appendChild(div);
-
-});
-
-}
-
-function buildVideoReels(){
-
-vidReels.innerHTML="";
-
-allGalleryVids.forEach(v=>{
-
-const div=document.createElement("div");
-div.className="reel-item";
-
-const vid=document.createElement("video");
-vid.src=v.querySelector("source").src;
-vid.playsInline=true;
-vid.muted=true;
-
-vid.onclick=()=>{
-if(vid.paused) vid.play();
-else vid.pause();
-};
-
-div.appendChild(vid);
-vidReels.appendChild(div);
-
-});
-
-}
-
-function moveReel(track,dir){
-
-reelIndex+=dir;
-
-if(reelIndex<0) reelIndex=0;
-
-const max=track.children.length-1;
-
-if(reelIndex>max) reelIndex=max;
-
-track.style.transform=`translateY(-${reelIndex*100}vh)`;
-
-}
-
-function enableSwipe(track,type){
-
-track.addEventListener("touchstart",e=>{
-startY=e.touches[0].clientY;
-startX=e.touches[0].clientX;
-},{passive:true});
-
-track.addEventListener("touchend",e=>{
-
-const endY=e.changedTouches[0].clientY;
-const endX=e.changedTouches[0].clientX;
-
-const diffY=endY-startY;
-const diffX=endX-startX;
-
-if(Math.abs(diffY)>80){
-
-if(diffY<0) moveReel(track,1);
-else moveReel(track,-1);
-
-}
-
-if(diffX>80){
-
-if(type==="img") closeLightbox();
-if(type==="vid") closeVideoLightbox();
-
-}
-
-},{passive:true});
-
-}
-
-buildImageReels();
-buildVideoReels();
-
-enableSwipe(imgReels,"img");
-enableSwipe(vidReels,"vid");
-
-/* MOBILE REELS GESTURES (DOES NOT AFFECT DESKTOP) */
-
-if(window.innerWidth <= 1000){
-
-let startY = 0;
-let startX = 0;
-
-const imgLB = document.getElementById("lightbox");
-const vidLB = document.getElementById("videoLightbox");
-
-/* IMAGE SWIPE */
-
-imgLB.addEventListener("touchstart", e=>{
-startY = e.touches[0].clientY;
-startX = e.touches[0].clientX;
-},{passive:true});
-
-imgLB.addEventListener("touchend", e=>{
-
-let endY = e.changedTouches[0].clientY;
-let endX = e.changedTouches[0].clientX;
-
-let diffY = endY - startY;
-let diffX = endX - startX;
-
-if(Math.abs(diffY) > 80){
-
-if(diffY < 0){
-navigateImages(1); // swipe up
-}else{
-navigateImages(-1); // swipe down
-}
-
-}
-
-if(diffX > 80){
-closeLightbox(); // swipe right to exit
-}
-
-},{passive:true});
-
-
-/* VIDEO SWIPE */
-
-vidLB.addEventListener("touchstart", e=>{
-startY = e.touches[0].clientY;
-startX = e.touches[0].clientX;
-},{passive:true});
-
-vidLB.addEventListener("touchend", e=>{
-
-let endY = e.changedTouches[0].clientY;
-let endX = e.changedTouches[0].clientX;
-
-let diffY = endY - startY;
-let diffX = endX - startX;
-
-if(Math.abs(diffY) > 80){
-
-if(diffY < 0){
-navigateVideos(1);
-}else{
-navigateVideos(-1);
-}
-
-}
-
-if(diffX > 80){
-closeVideoLightbox();
-}
-
-},{passive:true});
-
-
-/* TAP VIDEO TO PLAY */
-
-document.getElementById("lightboxVideo").addEventListener("click",function(){
-
-if(this.paused){
-this.play();
-}else{
-this.pause();
-}
-
-});
-
-}
