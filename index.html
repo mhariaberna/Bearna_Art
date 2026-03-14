@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mharia Berna | Visual Artist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/jpeg" href="images/berna_art.jpg">
+</head>
+<body>
+
+    <canvas id="paintCanvas"></canvas>
+
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="close">&times;</span>
+        <button class="lb-nav lb-prev" onclick="event.stopPropagation(); navigateImages(-1)">&#10094;</button>
+        <img class="lightbox-content" id="lightbox-img" onclick="event.stopPropagation()">
+        <button class="lb-nav lb-next" onclick="event.stopPropagation(); navigateImages(1)">&#10095;</button>
+    </div>
+
+    <div id="videoLightbox" class="lightbox" onclick="closeVideoLightbox()">
+        <span class="close">&times;</span>
+        <button class="lb-nav lb-prev" onclick="event.stopPropagation(); navigateVideos(-1)">&#10094;</button>
+        <div class="video-lightbox-wrapper" onclick="event.stopPropagation()">
+            <video id="lightboxVideo" playsinline controls disablePictureInPicture 
+                controlsList="nodownload noplaybackrate nofullscreen" 
+                oncontextmenu="return false;">
+                <source src="" type="video/mp4">
+            </video>
+        </div>
+        <button class="lb-nav lb-next" onclick="event.stopPropagation(); navigateVideos(1)">&#10095;</button>
+    </div>
+
+    <nav class="glass">
+        <div class="logo">Bearna<span>_Art</span></div>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#video">Process</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <section id="home" class="hero reveal">
+        <div class="hero-container">
+            <div class="profile-area">
+                <div class="profile-pic-wrapper glass">
+                    <img src="images/berna_art.jpg" alt="Mharia Berna" class="profile-img">
+                </div>
+            </div>
+            <div class="hero-content">
+                <h1 class="serif-title">Luminous <br><span>Digital Art</span></h1>
+                <p class="subtitle">Capturing emotion through light and color.</p>
+                <div class="cta-spacer">
+                    <a href="#gallery" class="cta-main glass">Enter Gallery</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery" class="reveal">
+        <h2 class="section-title serif-title">The Collection</h2>
+        <div class="gallery-container">
+            <div class="gallery-grid" id="galleryGrid">
+                <div class="art-card glass" onclick="openLightbox(this)"><img src="images/berna1.jpg" loading="lazy"alt="Art 1"></div>
+                <div class="art-card glass" onclick="openLightbox(this)"><img src="images/berna2.jpg" alt="Art 2"></div>
+                <div class="art-card glass" onclick="openLightbox(this)"><img src="images/berna3.jpg" alt="Art 3"></div>
+                <div class="art-card glass" onclick="openLightbox(this)"><img src="images/berna4.jpg" alt="Art 4"></div>
+                <div class="art-card glass" onclick="openLightbox(this)"><img src="images/berna5.jpg" alt="Art 5"></div>
+                <div class="art-card glass" onclick="openLightbox(this)"><img src="images/berna6.jpg" alt="Art 6"></div>
+                <div class="art-card glass" onclick="openLightbox(this)"><img src="images/berna7.jpg" alt="Art 7"></div>
+                <div class="art-card glass" onclick="openLightbox(this)"><img src="images/berna8.jpg" alt="Art 8"></div>
+                <div class="art-card glass" onclick="openLightbox(this)"><img src="images/berna9.jpg" alt="Art 9"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="video" class="reveal">
+        <h2 class="section-title serif-title">Creative Process</h2>
+        <div class="video-container">
+            <button class="slider-btn prev" onclick="moveVideoSlider(-1)">&#10094;</button>
+            <div class="video-viewport">
+                <div class="video-slider" id="videoSlider">
+                    
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork1.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork2.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork3.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork4.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork5.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                           <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork6.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="video-slide">
+                        <div class="video-wrapper glass">
+                            <video playsinline disablePictureInPicture controlsList="nodownload noplaybackrate nofullscreen">
+                                <source src="videos/Artwork7.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <button class="slider-btn next" onclick="moveVideoSlider(1)">&#10095;</button>
+        </div>
+    </section>
+
+    <section id="contact" class="reveal">
+        <div class="contact-container glass">
+            <div class="contact-info">
+                <h2 class="serif-title">Inquiries</h2>
+                <p>Available for freelance projects and custom character illustrations.</p>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/mhariabernaalcancia" target="_blank" class="social-icon">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" alt="FB" class="glass-icon">
+                    </a>
+                    <a href="https://www.instagram.com/bearna_art" target="_blank" class="social-icon">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="IG" class="glass-icon">
+                    </a>
+                </div>
+            </div>
+                <form class="contact-form" id="contactForm">
+                    <input type="text" name="name" id="userName" placeholder="Full Name" required>
+                    <input type="email" name="email" id="userEmail" placeholder="Email Address" required>
+                    <textarea name="message" id="userMessage" placeholder="Tell me about your vision..." rows="4" required></textarea>
+                    <button type="submit" id="submitBtn" class="submit-btn glass">Submit Inquiry</button>
+                </form>
+            <div id="thankYouMessage" class="thank-you-area" style="display: none;">
+                <div class="success-glow"></div>
+                <h2 class="serif-title">Message Sent</h2>
+                <p>Thank you for reaching out. I'll review your vision and get back to you shortly.</p>
+                <button onclick="resetForm()" class="cta-main glass" style="margin-top: 20px; font-size: 0.7rem; padding: 12px 30px;">Send Another</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Bearna_Art | Built with Artistry</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
